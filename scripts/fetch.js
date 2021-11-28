@@ -1,12 +1,24 @@
+import dotenv from 'dotenv'
+dotenv.config()
+import knex from 'knex'
 import fetch from 'node-fetch'
 import { existsSync, readFileSync, writeFileSync, createWriteStream } from 'fs'
 import { promisify } from 'util'
 
-const products = JSON.parse(readFileSync('products.json', 'utf8'))
+const db = knex({
+  client: 'pg',
+  connection: process.env.PG_CONNECTION_STRING,
+})
+
+try {
+  await db.raw('CREATE EXTENSION citext') // enable citext if not enabled
+} catch {}
 
 let results = [null]
 let page = 0
 let totalPage = 1
+let catalog = 312
+let pageSize = 100
 
 while (page < totalPage) {
   page++
@@ -25,9 +37,9 @@ while (page < totalPage) {
       'content-type': 'application/json;charset=UTF-8',
     },
     body: JSON.stringify({
-      catalogIdList: [11082],
+      catalogIdList: [catalog],
       currentPage: page,
-      pageSize: 100,
+      pageSize,
       paramNameValueMap: {},
       sortField: 'model',
       sortType: 'asc',
@@ -36,17 +48,29 @@ while (page < totalPage) {
   })
 
   const resObj = await res.json()
-  const { totalCount, currentPage, pageSize, productList, lastPage } = resObj
+  const { totalCount, currentPage, productList, lastPage } = resObj
   totalPage = resObj.totalPage
 
-  console.log({
-    totalPage,
-    lastPage,
-    totalCount,
-    currentPage,
-    pageSize,
-  })
-  productList.map(product => (products[product.productCode] = product))
+  console.log(
+    `[Catalog ${catalog}] ${(((currentPage * pageSize) / totalCount) * 100).toFixed(
+      2
+    )}% - Processed ${currentPage * pageSize} of ${totalCount}`
+  )
+  for (const product of productList) {
+    await db('parts')
+      .insert({
+        id: product.productCode,
+        description: product.productIntroEn,
+        images: product.productImages?.join(','),
+        package: product.encapStandard,
+        mfr: product.brandNameEn,
+        stock: product.stockNumber,
+        mfr_part: product.productModel,
+        datasheet: product.pdfUrl,
+      })
+      .onConflict('id')
+      .merge()
+  }
 }
 
 for (const productCode in products) {
