@@ -10,14 +10,15 @@ const db = knex({
   connection: process.env.PG_CONNECTION_STRING,
 })
 
+// TODO move to fixture file
 try {
-  await db.raw('CREATE EXTENSION citext') // enable citext if not enabled
+  await db.raw('CREATE EXTENSION citext') // enable case insensitive text columns if not enabled
 } catch {}
 
 let results = [null]
 let page = 0
 let totalPage = 1
-let catalog = 312
+let catalog = 1
 let pageSize = 100
 
 while (page < totalPage) {
