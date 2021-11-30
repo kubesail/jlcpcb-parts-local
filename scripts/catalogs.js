@@ -16,7 +16,6 @@ let res = await fetch('https://wwwapi.lcsc.com/v1/all-products/category', {
   },
   method: 'GET',
 })
-console.log('HELLO1')
 
 const catalogs = await res.json()
 for (const catalog of catalogs) {

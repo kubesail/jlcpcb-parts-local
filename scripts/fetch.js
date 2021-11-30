@@ -18,8 +18,8 @@ try {
 let results = [null]
 let page = 0
 let totalPage = 1
-let catalog = 1
-let pageSize = 100
+let catalog = 308
+let pageSize = 500
 
 while (page < totalPage) {
   page++
