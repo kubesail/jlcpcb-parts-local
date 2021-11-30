@@ -13,7 +13,9 @@
     "pg-query-stream": "^4.2.1"
   },
   "scripts": {
-    "fetch": "node scripts/fetch.js"
+    "fetch": "node scripts/fetch.js",
+    "catalogs": "node scripts/catalogs.js",
+    "images": "node scripts/images.js"
   },
   "prettier": {
     "semi": false,
