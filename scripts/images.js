@@ -1,12 +1,10 @@
-import dotenv from 'dotenv'
-dotenv.config()
 import knex from 'knex'
 import fetch from 'node-fetch'
 import { existsSync, createWriteStream } from 'fs'
 
 const db = knex({
   client: 'pg',
-  connection: process.env.PG_CONNECTION_STRING,
+  connection: 'postgres://root:root@localhost:5432/root',
 })
 
 let offset = 0
